@@ -2,11 +2,11 @@ import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import moment from "moment";
-import e from "express";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 moment().format();
+
 const filePath = path.join(__dirname, "..", "data", "expenses.json");
 
 export const readExpenses = async () => {
@@ -34,11 +34,7 @@ export const addExpense = async (data) => {
 };
 
 export const findExpense = (data, id) => {
-  try {
-    return data.find((exp) => exp.id === Number(id));
-  } catch (err) {
-    console.log(err);
-  }
+  return data.find((exp) => exp.id === Number(id));
 };
 export const createFile = async () => {
   try {
@@ -54,4 +50,23 @@ export const deleteExpense = (data, id) => {
     data: data.filter((exp) => exp.id !== Number(id)),
     deleted: data.find((exp) => exp.id === Number(id)),
   };
+};
+
+export const modifyExpense = (data, id, modifications) => {
+  return data.map((exp) =>
+    exp.id === Number(id)
+      ? (exp = {
+          ...exp,
+          ...modifications,
+        })
+      : exp
+  );
+};
+
+const templatePath = path.join(__dirname, "..", "index.html");
+
+export const templateMaker = async (data) => {
+  let template = await readFile(templatePath, "utf-8");
+  template = template.replace("{{%placeholder%}}", data);
+  return template;
 };

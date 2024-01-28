@@ -13,3 +13,7 @@ export const postSuccess = (exp) => {
   };
 };
 export const fileCreated = "File not found in directory, creating new one...";
+
+export const divTemplate = (exp) => {
+  return `<div><p>name - ${exp.name}</p><p>cost - ${exp.cost}</p><p>date - ${exp.createdAt}</p></div>`;
+};

@@ -7,11 +7,14 @@ import {
   findExpense,
   createFile,
   deleteExpense,
+  modifyExpense,
+  templateMaker,
 } from "./utils/fileManipulations.js";
 import {
   dataNotFound,
   postSuccess,
   fileCreated,
+  divTemplate,
 } from "./utils/commonMessages.js";
 dotenv.config();
 const app = express();
@@ -28,17 +31,19 @@ app.get("/expenses", async (req, res) => {
     res.json({ success: false, data: dataNotFound(err) });
   }
 });
-
 app.get("/expenses/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = await readExpenses();
-    const expense = findExpense(data, id);
-    console.log(expense);
+    const expense = await findExpense(data, id);
+    const expenseHTML = await divTemplate(expense);
+    const fullHTML = await templateMaker(expenseHTML);
     res.status(200);
-    res.json({ success: true, data: expense });
+    res.send(fullHTML);
   } catch (err) {
     console.log(err);
+    res.status(400);
+    res.json({ success: false, data: dataNotFound(err) });
   }
 });
 
@@ -74,8 +79,43 @@ app.post("/expenses", async (req, res) => {
   }
 });
 
-app.put("/expense/:id", (req, res) => {
-  const { id } = req.params;
+app.put("/expenses/:id", async (req, res) => {
+  try {
+    console.log("try");
+    const { id } = req.params;
+    const data = await readExpenses();
+    const isAvailable = findExpense(data, id);
+    if (isAvailable) {
+      try {
+        const modification = { cost: 50, name: "mamuka" };
+        const modifiedData = modifyExpense(data, id, modification);
+        await addExpense(modifiedData);
+        res.status(200);
+        res.json({
+          success: true,
+          data: `modifications -> ${JSON.stringify(
+            modification
+          )} applied to expense with id -> ${id}`,
+        });
+      } catch (err) {
+        res.status(400);
+        res.json({
+          success: true,
+          data: dataNotFound(err),
+        });
+      }
+    } else {
+      res.status(400);
+      res.json({
+        success: true,
+        data: `expense do not exist, modifications cant be applied`,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(400);
+    res.json({ success: false, data: dataNotFound(err) });
+  }
 });
 app.delete("/expenses/:id", async (req, res) => {
   try {
