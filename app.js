@@ -16,15 +16,20 @@ import {
   fileCreated,
   divTemplate,
 } from "./utils/commonMessages.js";
+import { logUserAgent } from "./utils/middleware.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set("view engine", "ejs");
+
+app.use(logUserAgent);
+
 app.get("/expenses", async (req, res) => {
   try {
-    const data = await readExpenses();
+    const expenses = await readExpenses();
     res.status(200);
-    res.json({ success: true, data: data });
+    res.render("expenseWrapper", { expenses });
   } catch (err) {
     console.log(err);
     res.status(400);
@@ -36,10 +41,13 @@ app.get("/expenses/:id", async (req, res) => {
     const { id } = req.params;
     const data = await readExpenses();
     const expense = await findExpense(data, id);
-    const expenseHTML = await divTemplate(expense);
-    const fullHTML = await templateMaker(expenseHTML);
+    console.log(expense);
     res.status(200);
-    res.send(fullHTML);
+    res.render("singleProduct", {
+      name: expense.name,
+      cost: expense.cost,
+      date: expense.createdAt,
+    });
   } catch (err) {
     console.log(err);
     res.status(400);

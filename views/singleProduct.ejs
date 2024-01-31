@@ -8,11 +8,18 @@
     <style>
       body {
         background-color: rgb(38, 39, 42);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
       }
       .container {
         display: flex;
         flex-direction: column;
-        gap: 40px;
+        gap: 10px;
+        border: 1px solid white;
+        padding: 25px;
+        border-radius: 20px;
       }
       .container div {
         border-radius: 20px;
@@ -21,9 +28,19 @@
         padding: 20px;
         max-width: 450px;
       }
+      .title {
+        color: rgb(212, 157, 157);
+      }
+      p {
+        color: rgb(158, 179, 198);
+      }
     </style>
   </head>
   <body>
-    <div class="container">{{%placeholder%}}</div>
+    <div class="container">
+      <p class="title">name - <%= name %></p>
+      <p>cost - <%= cost %></p>
+      <p>date - <%= date %></p>
+    </div>
   </body>
 </html>

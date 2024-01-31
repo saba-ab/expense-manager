@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .expense__wrapper {
+        margin: 0 auto;
+        max-width: 840px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        padding: 30px;
+        border: 20px;
+        border: 1px solid black;
+      }
+      .exp {
+        border: 1px solid red;
+        padding: 10px;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="expense__wrapper">
+      <% expenses.forEach(expense => { %>
+      <div class="exp"><%- include('expenseCard', { expense: expense }) %></div>
+
+      <% }); %>
+    </div>
+  </body>
+</html>
