@@ -4,17 +4,17 @@ import { fileURLToPath } from "url";
 import moment from "moment";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+import { Expense } from "../interfaces/interface.js";
 moment().format();
 
-const filePath = path.join(__dirname, "..", "data", "expenses.json");
+const filePath = path.join(__dirname, "..", "..", "data", "expenses.json");
 
-export const readExpenses = async () => {
+export const readExpenses = async (): Promise<Expense[]> => {
   const data = await readFile(filePath, "utf-8");
   const expenses = JSON.parse(data);
   return expenses;
 };
-export const newExpense = (id, name, cost) => {
+export const newExpense = (id: number, name: string, cost: number): Expense => {
   return {
     id,
     name,
@@ -23,7 +23,7 @@ export const newExpense = (id, name, cost) => {
   };
 };
 
-export const addExpense = async (data) => {
+export const addExpense = async (data: Expense[]) => {
   try {
     const jsonData = JSON.stringify(data);
     const result = await writeFile(filePath, jsonData, "utf-8");
@@ -33,26 +33,31 @@ export const addExpense = async (data) => {
   }
 };
 
-export const findExpense = (data, id) => {
-  return data.find((exp) => exp.id === Number(id));
+export const findExpense = (data: Expense[], id: number) => {
+  return data.find((exp: Expense) => exp.id === Number(id));
 };
-export const createFile = async () => {
+export const createFile = async (): Promise<Expense[]> => {
   try {
-    await writeFile(filePath, "[]", "utf-8");
+    await writeFile(filePath, JSON.stringify([]), "utf-8");
     return [];
   } catch (err) {
-    console.log(err);
+    console.error("Error creating the file:", err);
+    throw err;
   }
 };
 
-export const deleteExpense = (data, id) => {
+export const deleteExpense = (data: Expense[], id: number) => {
   return {
-    data: data.filter((exp) => exp.id !== Number(id)),
-    deleted: data.find((exp) => exp.id === Number(id)),
+    data: data.filter((exp: Expense) => exp.id !== Number(id)),
+    deleted: data.find((exp: Expense) => exp.id === Number(id)),
   };
 };
 
-export const modifyExpense = (data, id, modifications) => {
+export const modifyExpense = (
+  data: Expense[],
+  id: number,
+  modifications: Expense
+) => {
   return data.map((exp) =>
     exp.id === Number(id)
       ? (exp = {
@@ -65,7 +70,7 @@ export const modifyExpense = (data, id, modifications) => {
 
 const templatePath = path.join(__dirname, "..", "index.html");
 
-export const templateMaker = async (data) => {
+export const templateMaker = async (data: any) => {
   let template = await readFile(templatePath, "utf-8");
   template = template.replace("{{%placeholder%}}", data);
   return template;

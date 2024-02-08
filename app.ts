@@ -1,4 +1,4 @@
-import express, { json } from "express";
+import express, { json, Request, Response } from "express";
 import dotenv from "dotenv";
 import {
   readExpenses,
@@ -20,12 +20,13 @@ import { logUserAgent } from "./utils/middleware.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+import { ExpenseParams, isErrorWithCode } from "./interfaces/interface.js";
 
 app.set("view engine", "ejs");
 
 app.use(logUserAgent);
 
-app.get("/expenses", async (req, res) => {
+app.get("/expenses", async (req: Request, res: Response) => {
   try {
     const expenses = await readExpenses();
     res.status(200);
@@ -36,17 +37,18 @@ app.get("/expenses", async (req, res) => {
     res.json({ success: false, data: dataNotFound(err) });
   }
 });
-app.get("/expenses/:id", async (req, res) => {
+app.get("/expenses/:id", async (req: Request<ExpenseParams>, res: Response) => {
   try {
     const { id } = req.params;
     const data = await readExpenses();
-    const expense = await findExpense(data, id);
+    let newId = Number(id);
+    const expense = findExpense(data, newId);
     console.log(expense);
     res.status(200);
     res.render("singleProduct", {
-      name: expense.name,
-      cost: expense.cost,
-      date: expense.createdAt,
+      name: expense?.name,
+      cost: expense?.cost,
+      date: expense?.createdAt,
     });
   } catch (err) {
     console.log(err);
@@ -55,23 +57,23 @@ app.get("/expenses/:id", async (req, res) => {
   }
 });
 
-app.post("/expenses", async (req, res) => {
+app.post("/expenses", async (req: Request, res: Response) => {
   try {
     const data = await readExpenses();
-    const uid = data.length > 0 ? data[data.length - 1]?.id + 1 : 1;
-    console.log(uid);
-    const newData = newExpense(uid, "gia", 120);
-    await data.push(newData);
+    const lastExpense = data.length > 0 && data[data?.length - 1];
+    const uid = lastExpense ? lastExpense.id : 1;
+    const newData = uid && newExpense(uid, "gia", 120);
+    newData && data.push(newData);
     await addExpense(data);
-    res.status(200);
-    res.json({ success: true, data: postSuccess(newData) });
+    newData &&
+      res.status(200).json({ success: true, data: postSuccess(newData) });
   } catch (err) {
-    if (err.code === "ENOENT") {
+    if (isErrorWithCode(err) && err?.code === "ENOENT") {
       try {
         const data = await createFile();
         console.log(fileCreated);
         const newData = newExpense(1, "gia", 120);
-        data.push(newData);
+        data?.push(newData);
         await addExpense(data);
         res.status(200);
         res.json({ success: true, data: postSuccess(newData) });
@@ -87,16 +89,17 @@ app.post("/expenses", async (req, res) => {
   }
 });
 
-app.put("/expenses/:id", async (req, res) => {
+app.put("/expenses/:id", async (req: Request, res: Response) => {
   try {
     console.log("try");
     const { id } = req.params;
     const data = await readExpenses();
-    const isAvailable = findExpense(data, id);
+    let newId = Number(id);
+    const isAvailable = findExpense(data, newId);
     if (isAvailable) {
       try {
         const modification = { cost: 50, name: "mamuka" };
-        const modifiedData = modifyExpense(data, id, modification);
+        const modifiedData = modifyExpense(data, newId, modification);
         await addExpense(modifiedData);
         res.status(200);
         res.json({
@@ -125,11 +128,12 @@ app.put("/expenses/:id", async (req, res) => {
     res.json({ success: false, data: dataNotFound(err) });
   }
 });
-app.delete("/expenses/:id", async (req, res) => {
+app.delete("/expenses/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const data = await readExpenses();
-    const filteredData = deleteExpense(data, id);
+    let newId = Number(id);
+    const filteredData = deleteExpense(data, newId);
     const baseLength = data.length;
     await addExpense(filteredData.data);
     if (filteredData.data.length === baseLength) {
