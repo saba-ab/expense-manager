@@ -5,6 +5,7 @@ import moment from "moment";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { Expense } from "../interfaces/interface.js";
+import { write } from "fs";
 moment().format();
 
 const filePath = path.join(__dirname, "..", "..", "data", "expenses.json");

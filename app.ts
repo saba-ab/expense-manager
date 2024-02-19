@@ -1,14 +1,14 @@
-import express, { json, Request, Response } from "express";
+import express, { json, request, Request, Response } from "express";
 import dotenv from "dotenv";
 import {
   readExpenses,
-  newExpense,
   addExpense,
   findExpense,
   createFile,
   deleteExpense,
   modifyExpense,
   templateMaker,
+  newExpense,
 } from "./utils/fileManipulations.js";
 import {
   dataNotFound,
@@ -19,12 +19,19 @@ import {
 import { logUserAgent } from "./utils/middleware.js";
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 import { ExpenseParams, isErrorWithCode } from "./interfaces/interface.js";
 
 app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }), logUserAgent);
 
-app.use(logUserAgent);
+app.get("/", (req: Request, res: Response) => {
+  try {
+    res.render("homepage");
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 app.get("/expenses", async (req: Request, res: Response) => {
   try {
@@ -89,6 +96,22 @@ app.post("/expenses", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/submit-expense", async (req: Request, res: Response) => {
+  try {
+    const data = await readExpenses();
+    const lastExpense = data.length > 0 && data[data?.length - 1];
+    const uid = lastExpense ? lastExpense.id : 1;
+    const { name, cost } = req.body;
+    const expense = newExpense(Number(uid), name, cost);
+    res.json({
+      success: true,
+      data: expense,
+      message: "expense added successfully",
+    });
+  } catch (e) {
+    console.log(e);
+  }
+});
 app.put("/expenses/:id", async (req: Request, res: Response) => {
   try {
     console.log("try");
