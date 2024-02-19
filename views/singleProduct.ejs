@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="./styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: rgb(38, 39, 42);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid white;
+        padding: 25px;
+        border-radius: 20px;
+      }
+      .container div {
+        border-radius: 20px;
+        border: 2px solid rgb(255, 255, 255);
+        color: rgb(188, 188, 188);
+        padding: 20px;
+        max-width: 450px;
+      }
+      .title {
+        color: rgb(212, 157, 157);
+      }
+      p {
+        color: rgb(158, 179, 198);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p class="title">name - <%= name %></p>
+      <p>cost - <%= cost %></p>
+      <p>date - <%= date %></p>
+    </div>
+  </body>
+</html>
